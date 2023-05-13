@@ -9,5 +9,5 @@ Hello, this is a very basic script to fix massamounts of furniture by ripping th
 ### How to use?
 1. Download the script to wherever you wish.
 2. Open a command prompt in said folder location, as long as its the same location.
-3. Type `php XML-Data-Dump.php` and a new file called `items_base.sql` will appear in the same folder.
+3. Type `php XML-Dump.php` and a new file called `items_base.sql` will appear in the same folder.
 4. Run the SQL in database and you're done.
