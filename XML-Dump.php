@@ -1,7 +1,5 @@
 <?php
-
-$start = microtime(true);
-
+$start_time = microtime(true);
 ini_set('display_errors', true);
 ini_set('display_startup_errors', true);
 
@@ -43,19 +41,44 @@ $xmlstr = <<<XML
 XML;
 
 $xml = new SimpleXMLElement(file_get_contents('furnidata.xml'));
+$savesql = 'items_base.sql';
 
-//Loop trough multiple products
-echo '-- sql dump test 1.0 by Oliver <br />';
+// Open file for writing (creates file if it doesn't exist)
+$fp = fopen($savesql, 'w');
+
+echo 'SQL dump 2.0 by Oliver' . "\n";
 foreach($xml->roomitemtypes->furnitype as $product)
 {
-	$allow_walk = $product->canstandon; // can you walk on it?
-	//$description = $product->description;
-	$allow_sit = $product->cansiton; // can you sit on it?
-	$allow_lay = $product->canlayon; // can you lay on it?
-	$width = $product->xdim;
-	$length = $product->ydim;
-	$classname = $product->attributes()['classname'];
-	echo 'UPDATE `items_base` SET `allow_walk` = \''.$allow_walk. '\', `allow_sit` = \''.$allow_sit.'\', `allow_lay` = \''.$allow_lay.'\', `width` = \''.$width.'\', `length` = \''.$length.'\' WHERE `item_name` = \''.$classname.'\';';
-    echo '<br/>';
+    $allow_walk = $product->canstandon;
+	$name = $product->name;
+	$name = preg_replace('/[\'`]/', '\\\\$0', $name); // add backslash infront of ' & `. Do this for desc aswell If you use it.
+    //$description = $product->description;
+    $allow_sit = $product->cansiton;
+    $allow_lay = $product->canlayon;
+    $width = $product->xdim;
+    $length = $product->ydim;
+    $classname = $product->attributes()['classname'];
+    $blyat = 'UPDATE `items_base` SET `public_name` = \''.$name. '\', `allow_walk` = \''.$allow_walk. '\', `allow_sit` = \''.$allow_sit.'\', `allow_lay` = \''.$allow_lay.'\', `width` = \''.$width.'\', `length` = \''.$length.'\' WHERE `item_name` = \''.$classname.'\';';
+
+    $output = $blyat . "\n";
+    file_put_contents($savesql, $output, FILE_APPEND);
 }
+
+foreach($xml->wallitemtypes->furnitype as $product)
+{
+    $name = $product->name;
+	$name = preg_replace('/[\'`]/', '\\\\$0', $name); // add backslash infront of ' & `. Do this for desc aswell If you use it.
+	//$description = $product->description;
+    $classname = $product->attributes()['classname'];
+    $blyat = 'UPDATE `items_base` SET `public_name` = \''.$name.'\' WHERE `item_name` = \''.$classname.'\';';
+
+    $output = $blyat . "\n";
+    file_put_contents($savesql, $output, FILE_APPEND);
+}
+
+// Notify its done and time for fun
+$end_time = microtime(true);
+$time_taken = round($end_time - $start_time, 2);
+echo "Completed in " . $time_taken . " seconds.";
+fclose($fp);
 ?>
